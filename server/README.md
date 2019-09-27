@@ -1,7 +1,7 @@
-# svision
+# svision server
 
 <div align="center">
-  <img src="assets/images/svision.png"><br><br>
+  <img src="../assets/images/svision.png"><br><br>
 </div> 
 
 -----------------
