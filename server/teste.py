@@ -1,4 +1,4 @@
-import rpyc
+#import rpyc
 
 import sys
 import os
@@ -14,10 +14,10 @@ from image_detect import yolo_detect
 
 from tensorflow.keras.models import model_from_json
 
-rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
+#rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
 
 
-class DetectService(rpyc.Service):   
+class DetectService:#(rpyc.Service):   
     def on_connect(self, conn):
         self.yolo = YOLO()
         
@@ -40,13 +40,25 @@ class DetectService(rpyc.Service):
     def exposed_detect(self, rpyc_img): # this is an exposed method
         image = rpyc.classic.obtain(rpyc_img)
         inicio = time.time()
-        img, qtd_epi, qtd_noepi = yolo_detect(self.yolo, self.loaded_model, image)
+        img, person = yolo_detect(self.yolo, self.loaded_model, image)
         fim = time.time()
-        return (img, qtd_epi, qtd_noepi, (fim - inicio))
+        return img#, person, (fim - inicio)
                
     
     def exposed_get_status(self):
         return 'ok'
+
+    def teste():
+        yolo = YOLO()
+        
+        json_file = open('svision_model/vgg_rmsprop_10ep.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        loaded_model = model_from_json(loaded_model_json)
+        # load weights into new model
+        loaded_model.load_weights("svision_model/vgg_rmsprop_10ep.h5")
+
+        
     
 if __name__ == "__main__":
     from rpyc.utils.server import ThreadedServer
