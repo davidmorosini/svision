@@ -5,3 +5,5 @@ svision_model/
 *.swp
 *.cfg
 *.weights
+
+*.ipynb
