@@ -1,6 +1,7 @@
 import os
 import rpyc
 import json
+import logging
 
 import pyscreenshot
 import numpy as np
@@ -47,27 +48,33 @@ def get_connection(IP, PORT, TRY_NUM, SLEEP):
         con = rpyc.connect(IP, PORT, config = rpyc.core.protocol.DEFAULT_CONFIG)
         print('Service conected at {}:{}'.format(IP, PORT))
         print('Initializing remote modules..')
+        logging.info('Service conected at {}:{}'.format(IP, PORT))
     except ConnectionRefusedError as ref:
         print('Error to connect at {}:{}'.format(IP, PORT))
-        print('Description: {}'.format(ref))
-    except:
-        print('Unknow Error to connect at {}:{}'.format(IP, PORT))
+        logging.error('Description: {}'.format(ref))
+    except Exception as e:
+        logging.error(e)
     finally:
         if(con == None):
             print('\nStart {} tentatives to connect at {}:{}'.format(TRY_NUM, IP, PORT))
+            logging.info('Start {} tentatives to connect at {}:{}'.format(TRY_NUM, IP, PORT))
             for i in range(0, TRY_NUM):
                 print('Try [{}/{}]'.format(i+1, TRY_NUM))
                 try:
                     con = rpyc.connect(IP, PORT, config = rpyc.core.protocol.DEFAULT_CONFIG)
                     print('SUCESS: Connection established.')
                     print('Initializing remote modules..')
+                    logging.info('SUCESS - Connection established')
                     break
-                except:
+                except Exception as e:
                     if((i + 1) < TRY_NUM):
-                        print('FAILED: next try in {} sec'.format(SLEEP))
+                        print('FAILED - next try in {} sec'.format(SLEEP))
+                        logging.error(e)
+                        logging.info('FAILED - next try in {} sec'.format(SLEEP))
                         time.sleep(SLEEP)
                     else:
-                        print('FAILED: Aborting process execution.')
+                        print('FAILED - Aborting process execution.')
+                        logging.info('FAILED - Aborting process execution.')
     return con
 
 def main():
@@ -86,9 +93,18 @@ def main():
             def_name = data['DEFAULT_NAME_OUT'] 
             def_type = data['DEFAULT_TYPE_OUT'] 
             flag_config = True
+            
+        log_path = data['LOG']['path']
+        if(not(os.path.isdir(log_path))):
+            os.mkdir(log_path)
+        
+        log_path = os.path.join(log_path, data['LOG']['name'])
+        logging.basicConfig(filename = log_path, filemode = data['LOG']['filemode'], \
+                            level = logging.INFO,\
+                            format = data['LOG']['format'], \
+                            datefmt = data['LOG']['dtformat'] )
     except Exception as e:
-        print('Error to open configs.json file, aborting process.')
-        print(e)
+        print('Error to open configs.json file, aborting process.\nDetails: {}'.format(e))
     
     if(flag_config):
         if(not(os.path.isdir(out_path))):

@@ -7,6 +7,13 @@
 	"TRY_NUM_RECUP":3,
 	"OUT_PATH":"svision_out",
 	"DEFAULT_NAME_OUT":"svision_out",
-	"DEFAULT_TYPE_OUT":"png"
+	"DEFAULT_TYPE_OUT":"png",
+	"LOG":{
+		"path":"svision_log",
+		"name":"slog.log",
+		"format":"%(levelname)s: %(message)s -- %(asctime)s ",
+		"dtformat":"%d/%m/%Y %I:%M:%S %p",
+		"filemode":"a"
+    }
 }
 
