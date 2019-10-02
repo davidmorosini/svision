@@ -15,6 +15,7 @@ def yolo_detect(yolo, model, img):
         
     person = 0
     person_class = 0
+    qtd_epi, qtd_noepi = 0, 0
 
     for j, b in enumerate(boxes):
         #arredondando para baixo
@@ -27,12 +28,16 @@ def yolo_detect(yolo, model, img):
             im_aux_ = cv2.resize(im_aux, (75, 75), interpolation = cv2.INTER_AREA)
             
             res = model.predict([[im_aux_]])
-            fill_='green'
+            
             if(res[0][0] > 0.5):
                 fill_='red'
+                qtd_noepi += 1
+            else:
+                fill_='green'
+                qtd_epi += 1
             draw.line(((aux[1], aux[0]), (aux[3], aux[0]), (aux[3], aux[2]), (aux[1], aux[2]), (aux[1], aux[0])), fill=fill_, width=4)
     
-    return img, person
+    return img, qtd_epi, qtd_noepi 
 
    
         
