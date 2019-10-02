@@ -21,12 +21,12 @@ class DetectService(rpyc.Service):
     def on_connect(self, conn):
         self.yolo = YOLO()
         
-        json_file = open('svision/vgg_rmsprop_10ep.json', 'r')
+        json_file = open('svision_model/vgg_rmsprop_10ep.json', 'r')
         loaded_model_json = json_file.read()
         json_file.close()
         self.loaded_model = model_from_json(loaded_model_json)
         # load weights into new model
-        self.loaded_model.load_weights("svision/vgg_rmsprop_10ep.h5")
+        self.loaded_model.load_weights("svision_model/vgg_rmsprop_10ep.h5")
         # code that runs when a connection is created
         # (to init the service, if needed)'''
         pass
