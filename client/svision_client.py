@@ -11,6 +11,7 @@ import datetime
 
 from multiprocessing import Process, freeze_support
 
+#Configuração necessária para envio de objetos
 rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
 
 def cls():
@@ -46,35 +47,34 @@ def get_connection(IP, PORT, TRY_NUM, SLEEP):
     
     try:
         con = rpyc.connect(IP, PORT, config = rpyc.core.protocol.DEFAULT_CONFIG)
-        print('Service conected at {}:{}'.format(IP, PORT))
-        print('Initializing remote modules..')
+        print('svision conected at {}:{}'.format(IP, PORT))
+        print('Initializing remote modules. Wait a few seconds..')
         logging.info('Service conected at {}:{}'.format(IP, PORT))
     except ConnectionRefusedError as ref:
-        print('Error to connect at {}:{}'.format(IP, PORT))
-        logging.error('Description: {}'.format(ref))
+        print('Connection refused.')
+        logging.error(ref)
     except Exception as e:
         logging.error(e)
     finally:
         if(con == None):
-            print('\nStart {} tentatives to connect at {}:{}'.format(TRY_NUM, IP, PORT))
+            print('* Start {} tentatives to connect at {}:{}'.format(TRY_NUM, IP, PORT))
             logging.info('Start {} tentatives to connect at {}:{}'.format(TRY_NUM, IP, PORT))
             for i in range(0, TRY_NUM):
-                print('Try [{}/{}]'.format(i+1, TRY_NUM))
+                print('\t-> Tentative [{}/{}]'.format(i+1, TRY_NUM))
                 try:
                     con = rpyc.connect(IP, PORT, config = rpyc.core.protocol.DEFAULT_CONFIG)
-                    print('SUCESS: Connection established.')
-                    print('Initializing remote modules..')
+                    print('* SUCESS: Connection established.')
                     logging.info('SUCESS - Connection established')
                     break
                 except Exception as e:
                     if((i + 1) < TRY_NUM):
-                        print('FAILED - next try in {} sec'.format(SLEEP))
+                        print('\tFAILED: next tentative in {} sec'.format(SLEEP))
                         logging.error(e)
-                        logging.info('FAILED - next try in {} sec'.format(SLEEP))
+                        logging.info('next tentative in {} sec'.format(SLEEP))
                         time.sleep(SLEEP)
                     else:
-                        print('FAILED - Aborting process execution.')
-                        logging.info('FAILED - Aborting process execution.')
+                        print('* FAILED: Aborting svision system.')
+                        logging.info('FAILED - Aborting svision system.')
     return con
 
 def main():
@@ -83,50 +83,61 @@ def main():
     try:
         with open('configs.json') as js:
             data = json.load(js)
-            IP = data['IP']
-            PORT = data['PORT']
-            SLEEP_TIME = data['SLEEP_TIME']
-            SLEEP_TRY_CON = data['SLEEP_TRY_CON']
-            out_path = data['OUT_PATH']
-            try_numb_con = data['TRY_NUM_CON']
-            recup_num = data['TRY_NUM_RECUP'] 
-            def_name = data['DEFAULT_NAME_OUT'] 
-            def_type = data['DEFAULT_TYPE_OUT'] 
-            flag_config = True
-            
+
+        IP = data['RSERVICE']['HOST']
+        PORT = data['RSERVICE']['PORT']
+
+        SLEEP_TIME = data['SYSTEM']['SLEEP_TIME']
+        SLEEP_TRY_CON = data['SYSTEM']['SLEEP_TRY_CON']
+        out_path = data['SYSTEM']['OUT_PATH']
+        try_numb_con = data['SYSTEM']['TRY_NUM_CON']
+        recup_num = data['SYSTEM']['TRY_NUM_RECUP'] 
+        def_name = data['SYSTEM']['DEFAULT_NAME_OUT'] 
+        def_type = data['SYSTEM']['DEFAULT_TYPE_OUT'] 
+        cam_name = data['SYSTEM']['CAM_NAME']
+        
         log_path = data['LOG']['path']
+
         if(not(os.path.isdir(log_path))):
             os.mkdir(log_path)
-        
-        log_path = os.path.join(log_path, data['LOG']['name'])
-        logging.basicConfig(filename = log_path, filemode = data['LOG']['filemode'], \
+
+        slog = os.path.join(log_path, data['LOG']['name'])
+
+        logging.basicConfig(filename = slog, filemode = data['LOG']['filemode'], \
                             level = logging.INFO,\
                             format = data['LOG']['format'], \
-                            datefmt = data['LOG']['dtformat'] )
+                            datefmt = data['LOG']['dtformat'])
+        flag_config = True
+
     except Exception as e:
-        print('Error to open configs.json file, aborting process.\nDetails: {}'.format(e))
+        print('Error to open configs.json file, aborting svision local process.\nDetails: {}'.format(e))
     
     if(flag_config):
+        logging.info('svision online.')
+        cam_out = os.path.join(out_path, cam_name)
+        #Criando diretório de saída baseado no nome da camera atual
         if(not(os.path.isdir(out_path))):
             os.mkdir(out_path)
+        if(not(os.path.isdir(cam_out))):
+            os.mkdir(cam_out)
         
-
+        print('starting svision system\n')
         con = get_connection(IP, PORT, try_numb_con, SLEEP_TRY_CON)
         flag_run = False
         if(con != None):
             flag_run = True
-        
-        
+            
         while(flag_run):
             if(con != None):
                 max_recup = recup_num
                 
             try:
                 while(con != None):
-                    save_name_ = os.path.join(out_path, '{}_{}.{}'.format(def_name, string_time(), def_type))
+                    save_name_ = os.path.join(cam_out, '{}_{}.{}'.format(def_name, string_time(), def_type))
                     call_detect(con.root, save_name=save_name_)
                     time.sleep(SLEEP_TIME)
-            except:
+            except Exception as exec_err:
+                logging.error(exec_err)
                 max_recup = max_recup - 1
                 con = get_connection(IP, PORT, try_numb_con, SLEEP_TRY_CON)
             
@@ -137,9 +148,12 @@ def main():
             
             if(max_recup == 0):
                 flag_run = False
+        
+        logging.info('svision offline.')
             
 
 if __name__ == '__main__':
+    #necessário para execução de chamada remota
     freeze_support()
     p = Process(target=main)
     p.start()
