@@ -6,6 +6,14 @@
 
 -----------------
 
+## svision client executando
+
+<div align="center">
+  <img src="assets/images/svision_client.png"><br><br>
+</div> 
+
+-----------------
+
 ## Configuração do ambiente
 
 - Instalar o anaconda
