@@ -5,11 +5,24 @@
 </div> 
 
 -----------------
-
 ## svision client executando
 
 <div align="center">
   <img src="assets/images/svision_client.png"><br><br>
+</div> 
+
+-----------------
+## Exemplo de detecção com EPI
+
+<div align="center">
+  <img src="assets/images/exemplo_epi.png"><br><br>
+</div> 
+
+-----------------
+## Exemplo de detecção sem EPI
+
+<div align="center">
+  <img src="assets/images/exemplo_noepi.png"><br><br>
 </div> 
 
 -----------------
