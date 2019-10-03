@@ -1,41 +1,52 @@
+import json
 import rpyc
-
 import sys
 import os
 import time
+import logging
+
+from PIL import Image
+from rpyc.utils.server import ThreadedServer
+from tensorflow.keras.models import model_from_json
+
 sys.path.append('./yolov3/')
 sys.path.append('./yolov3/model_data/')
 sys.path.append('./svision/')
 
-from PIL import Image
-
 from yolo import YOLO
 from image_detect import yolo_detect
 
-from tensorflow.keras.models import model_from_json
 
 rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
 
 
-class DetectService(rpyc.Service):   
+class DetectService(rpyc.Service):  
     def on_connect(self, conn):
-        self.yolo = YOLO()
+        self.status = 200
+        try:
+            self.yolo = YOLO()
+            
+            svision_path = data['SYSTEM']['SVISION_MODEL_PATH']
+
+            json_file = open(os.path.join(svision_path, data['SYSTEM']['SVISION_MODEL']), 'r')
+            loaded_model_json = json_file.read()
+            json_file.close()
+            self.loaded_model = model_from_json(loaded_model_json)
+            # load weights into new model
+            self.loaded_model.load_weights(os.path.join(svision_path, data['SYSTEM']['SVISION_WEIGHTS']))
+        except Exception as err:
+            logging.critical(err)
         
-        json_file = open('svision_model/vgg_rmsprop_10ep.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        self.loaded_model = model_from_json(loaded_model_json)
-        # load weights into new model
-        self.loaded_model.load_weights("svision_model/vgg_rmsprop_10ep.h5")
-        # code that runs when a connection is created
-        # (to init the service, if needed)'''
-        pass
 
     def on_disconnect(self, conn):
-        self.yolo.close_session()
-        # code that runs after the connection has already closed
-        # (to finalize the service, if needed)
-        pass
+        try:
+            if(self.status == 200):
+                self.yolo.close_session()
+                logging.info('close yolo session and finalize svision server process.')
+        except Exception as err:
+            logging.info(err)
+        self.status = 400
+        
 
     def exposed_detect(self, rpyc_img): # this is an exposed method
         image = rpyc.classic.obtain(rpyc_img)
@@ -46,10 +57,36 @@ class DetectService(rpyc.Service):
                
     
     def exposed_get_status(self):
-        return 'ok'
+        return self.status
     
 if __name__ == "__main__":
-    from rpyc.utils.server import ThreadedServer
-    t = ThreadedServer(DetectService, port=50001)
-    print('remote call online on port: 50001')
-    t.start()
+    conf_path = 'configs.json'
+    if(len(sys.argv) > 1):
+        conf_path = sys.argv[1]
+    
+    try:
+        with open(conf_path, 'r') as arq:
+            data = json.loads(arq.read())
+
+        log_path = data['LOG']['path']
+
+        if(not(os.path.isdir(log_path))):
+            os.mkdir(log_path)
+
+        slog = os.path.join(log_path, data['LOG']['name'])
+
+        logging.basicConfig(filename = slog, filemode = data['LOG']['filemode'], \
+                            level = logging.INFO,\
+                            format = data['LOG']['format'], \
+                            datefmt = data['LOG']['dtformat'])
+        
+        port = data['SYSTEM']['PORT']
+        t = ThreadedServer(DetectService, port=port)
+        print('svision server online on port: {}'.format(port))
+        logging.info('svision server online on port: {}'.format(port))
+        t.start()
+    except Exception as err:
+        print('Error on load server configs.\nDETAILS: {}'.format(err))
+
+
+    
