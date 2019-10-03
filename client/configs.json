@@ -1,19 +1,24 @@
 {
-	"IP":"127.0.0.1",
-	"PORT":50001,
-	"SLEEP_TIME":1,
-	"SLEEP_TRY_CON":5,
-	"TRY_NUM_CON":5,
-	"TRY_NUM_RECUP":3,
-	"OUT_PATH":"svision_out",
-	"DEFAULT_NAME_OUT":"svision_out",
-	"DEFAULT_TYPE_OUT":"png",
+	"RSERVICE":{
+		"HOST":"127.0.0.1",
+		"PORT":50001
+	},
 	"LOG":{
 		"path":"svision_log",
 		"name":"slog.log",
 		"format":"%(levelname)s: %(message)s -- %(asctime)s ",
-		"dtformat":"%d/%m/%Y %I:%M:%S %p",
+		"dtformat":"%d/%m/%Y %H:%M:%S",
 		"filemode":"a"
-    }
+	},
+	"SYSTEM":{
+		"SLEEP_TIME":1,
+		"SLEEP_TRY_CON":5,
+		"TRY_NUM_CON":5,
+		"TRY_NUM_RECUP":3,
+		"CAM_NAME":"CAM_TESTE_01",
+		"OUT_PATH":"svision_out",
+		"DEFAULT_NAME_OUT":"svision_out",
+		"DEFAULT_TYPE_OUT":"png"
+	}
 }
 
