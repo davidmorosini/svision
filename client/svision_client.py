@@ -16,7 +16,7 @@ rpyc.core.protocol.DEFAULT_CONFIG['allow_pickle'] = True
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
-    
+
 def string_time():
     now = datetime.datetime.now()
     year = '{:02d}'.format(now.year)
@@ -28,7 +28,7 @@ def string_time():
     str_date = '{}{}{}_{}{}{}'.format(year, month, day, hour, minute, second)
     return str_date
 
-def call_detect(con, save_name='svision_out.png'):
+def call_detect(con, save_name='svision_out.png', cam=''):
     im = pyscreenshot.grab()    
     rpyc_bundle = con.exposed_detect(im)
     bundle = rpyc.classic.obtain(rpyc_bundle) 
@@ -40,8 +40,8 @@ def call_detect(con, save_name='svision_out.png'):
         img_save_ = save_name   
     cls()
     time = round(time, 4)
-    print('\nStatus:\n* Pessoas Detectadas: {}\n\t- Com EPI: {}\n\t- Sem EPI: {}\n*Tempo de detecção: {} s\n*Imagem salva: {}'.format(qtd_epi + qtd_noepi, qtd_epi, qtd_noepi, time, img_save_))
-    
+    print('svision system online\n\nCamera Monitorada: {}\n\nStatus:\n* Pessoas Detectadas: {}\n\t- Com EPI: {}\n\t- Sem EPI: {}\n* Tempo de detecção: {} s\n* Imagem salva: {}'.format(cam, qtd_epi + qtd_noepi, qtd_epi, qtd_noepi, time, img_save_))
+
 def get_connection(IP, PORT, TRY_NUM, SLEEP):
     con = None
     
@@ -64,6 +64,7 @@ def get_connection(IP, PORT, TRY_NUM, SLEEP):
                 try:
                     con = rpyc.connect(IP, PORT, config = rpyc.core.protocol.DEFAULT_CONFIG)
                     print('* SUCESS: Connection established.')
+                    print('Initializing remote modules. Wait a few seconds..')
                     logging.info('SUCESS - Connection established')
                     break
                 except Exception as e:
@@ -130,23 +131,21 @@ def main():
         while(flag_run):
             if(con != None):
                 max_recup = recup_num
-                
+            else:
+                max_recup -= 1
+                con = get_connection(IP, PORT, try_numb_con, SLEEP_TRY_CON)
+                            
             try:
                 while(con != None):
                     save_name_ = os.path.join(cam_out, '{}_{}.{}'.format(def_name, string_time(), def_type))
-                    call_detect(con.root, save_name=save_name_)
+                    call_detect(con.root, save_name=save_name_, cam=cam_name)
                     time.sleep(SLEEP_TIME)
             except Exception as exec_err:
                 logging.error(exec_err)
-                max_recup = max_recup - 1
+                max_recup -= 1
                 con = get_connection(IP, PORT, try_numb_con, SLEEP_TRY_CON)
-            
-            
-            else:
-                max_recup = max_recup - 1
-                con = get_connection(IP, PORT, try_numb_con, SLEEP_TRY_CON)
-            
-            if(max_recup == 0):
+
+            if(max_recup < 1):
                 flag_run = False
         
         logging.info('svision offline.')
