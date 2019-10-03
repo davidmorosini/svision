@@ -1,0 +1,16 @@
+{
+	"LOG":{
+		"path":"svision_log",
+		"name":"slog.log",
+		"format":"%(levelname)s: %(message)s -- %(asctime)s ",
+		"dtformat":"%d/%m/%Y %H:%M:%S",
+		"filemode":"a"
+	},
+	"SYSTEM":{
+		"SVISION_MODEL_PATH":"svision_model",
+		"SVISION_MODEL":"vgg_rmsprop_10ep.json",
+		"SVISION_WEIGHTS":"vgg_rmsprop_10ep.h5",
+		"PORT":50001	
+	}
+}
+
