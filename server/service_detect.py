@@ -27,7 +27,7 @@ class DetectService(rpyc.Service):
             self.yolo = YOLO()
             
             svision_path = data['SYSTEM']['SVISION_MODEL_PATH']
-
+            self.margin = data['SYSTEM']['MARGIN_DETECT']
             json_file = open(os.path.join(svision_path, data['SYSTEM']['SVISION_MODEL']), 'r')
             loaded_model_json = json_file.read()
             json_file.close()
