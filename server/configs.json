@@ -1,4 +1,8 @@
 {
+	"WEBSERVER":{
+		"HOST":"127.0.0.1",
+		"PORT":60000
+	},
 	"LOG":{
 		"path":"svision_log",
 		"name":"slog.log",
@@ -7,7 +11,7 @@
 		"filemode":"a"
 	},
 	"SYSTEM":{
-		"SVISION_MODEL_PATH":"svision_model",
+		"SVISION_MODEL_PATH":"./core/svision_model",
 		"SVISION_MODEL":"vgg_rmsprop_10ep.json",
 		"SVISION_WEIGHTS":"vgg_rmsprop_10ep.h5",
 		"PORT":50001,
