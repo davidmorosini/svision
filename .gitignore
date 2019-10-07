@@ -1,9 +1,14 @@
 bin/
 __pycache__/
-model_data/
-svision_model/
+
+.DS_Store
 *.swp
 *.cfg
 *.weights
-
 *.ipynb
+
+model_data/
+svision_model/
+svision_log/
+svision_out/
+teste.py
