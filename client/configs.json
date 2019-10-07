@@ -1,7 +1,7 @@
 {
 	"RSERVICE":{
 		"HOST":"127.0.0.1",
-		"PORT":50001
+		"PORT":50000
 	},
 	"LOG":{
 		"path":"svision_log",
