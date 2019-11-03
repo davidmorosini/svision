@@ -15,7 +15,7 @@
 		"SLEEP_TRY_CON":5,
 		"TRY_NUM_CON":5,
 		"TRY_NUM_RECUP":3,
-		"CAM_NAME":"CAM_TESTE_01",
+		"CAM_NAME":"TESTE",
 		"OUT_PATH":"svision_out",
 		"DEFAULT_NAME_OUT":"svision_out",
 		"DEFAULT_TYPE_OUT":"png"
