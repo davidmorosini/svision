@@ -8,7 +8,12 @@ import threading
 
 from PIL import Image
 from rpyc.utils.server import ThreadedServer
+
 from tensorflow.keras.models import model_from_json
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.layers import Dense, Dropout, Flatten
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.optimizers import SGD
 
 sys.path.append('./core/yolov3/')
 sys.path.append('./core/yolov3/model_data/')
@@ -37,13 +42,18 @@ class DetectService(rpyc.Service):
             #self.margin = data['SYSTEM']['MARGIN_DETECT']
             self.margin = 10
             #json_file = open(os.path.join(svision_path, data['SYSTEM']['SVISION_MODEL']), 'r')
-            json_file = open(os.path.join(svision_path, 'vgg_rmsprop_10ep.json'), 'r')
-            loaded_model_json = json_file.read()
-            json_file.close()
-            self.loaded_model = model_from_json(loaded_model_json)
+            #json_file = open(os.path.join(svision_path, 'svision_model.json'), 'r')
+            #loaded_model_json = json_file.read()
+            #json_file.close()
+            self.loaded_model = self.create_model()
+            
             # load weights into new model
             #self.loaded_model.load_weights(os.path.join(svision_path, data['SYSTEM']['SVISION_WEIGHTS']))
-            self.loaded_model.load_weights(os.path.join(svision_path, 'vgg_rmsprop_10ep.h5'))
+            self.loaded_model.load_weights(os.path.join(svision_path, 'svision_weights.hdf5'))
+
+            opt = SGD(lr=0.001, momentum=0.9)
+            self.loaded_model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+
             status_['client'] = True
         except Exception as err:
             logging.critical(err)
@@ -57,6 +67,22 @@ class DetectService(rpyc.Service):
         except Exception as err:
             logging.info(err)
         self.status = 400
+ 
+    def create_model(self, num_classes=2, input_shape=(224, 224, 3)):
+        vgg_16_base = VGG16(weights=None, include_top=False, input_shape=input_shape)
+    
+        for l in vgg_16_base.layers:
+            l.trainable = False
+            
+        model_vgg16 = Sequential()
+        model_vgg16.add(vgg_16_base)
+
+        model_vgg16.add(Flatten())
+        model_vgg16.add(Dense(1024, activation='relu'))
+        model_vgg16.add(Dropout(0.5))
+        model_vgg16.add(Dense(num_classes, activation='softmax'))
+
+        return model_vgg16
         
 
     def exposed_detect(self, rpyc_img): # this is an exposed method
