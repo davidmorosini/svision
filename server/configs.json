@@ -14,7 +14,7 @@
 		"SVISION_MODEL_PATH":"./core/svision_model",
 		"SVISION_MODEL":"vgg_rmsprop_10ep.json",
 		"SVISION_WEIGHTS":"vgg_rmsprop_10ep.h5",
-		"PORT":50001,
+		"PORT":50000,
 		"MARGIN_DETECT":10	
 	}
 }
