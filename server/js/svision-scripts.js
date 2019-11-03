@@ -7,16 +7,22 @@ var person = 0;
 
 function set_display_values(values){
 
-  check = false
+  var check = false;
   if(values['webserver']){
-    check = true
-  }
-  client_c = "not-connected"
-  if(values['client']){
-    client_c = "connected"
+    check = true;
   }
   
-  document.getElementById('client_con').innerText = client_c
+  var client_c = "not-connected";
+  var client_color = 'red';
+  
+  if(values['client']){
+    client_c = "connected";
+    client_color = 'green';
+  }
+  
+  var client_connected = document.getElementById('client_con');
+  client_connected.innerText = client_c;
+  //client_connected.innerHTML.style.color = client_color;
   document.getElementById('myonoffswitch').checked = check
   document.getElementById('noepi_count').innerText = values['no_epi'];
   document.getElementById('epi_count').innerText = values['epi'];
@@ -56,7 +62,7 @@ function toggle_service(){
   start_server = !start_server;
 
     console.log(start_server)
-    //start_bot/ or test/
+    
     var req = '/service';
     
     $.ajax({
