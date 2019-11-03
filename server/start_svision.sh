@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python service_detect.py configs.json
+python svision_app.py configs.json
